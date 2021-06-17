@@ -5,7 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 import base64
 import glob
-
+import pickle
 
 ####################################################################
 ####################################################################
@@ -50,24 +50,61 @@ def decrypt_file(file,seed):
 ####################################################################
 ####################################################################
 
+previous_exists = False
 
-diary_path = 'Diaries/'
+diary_path = 'Diaries'
 diary_path = os.path.join(os.path.dirname(__file__), diary_path)
 
-key_seed = input('enter password :')
+if not os.path.exists(diary_path):
+    os.makedirs(diary_path)
 
-diaries = []
+existing_diaries = glob.glob(diary_path+'/*.txt')
 
-for diary in glob.glob(diary_path+'*.txt'):
+if(len(existing_diaries) != 0):
 
-    diaries.append(diary)
-    encrypt_file(diary,key_seed)
+    meta_dir = 'meta'
+    meta_dir = os.path.join(os.path.dirname(__file__), meta_dir)
+    meta_diaries = 'previous.pkl'
 
-to_quit = input('press any key to quit')
+    previous_diaries = []
+    diaries = []
+
+    key_seed = input('enter password :\n')
 
 
-for diary in diaries:
+    if not os.path.exists(meta_dir):
+        os.makedirs(meta_dir)
+    else:
+        previous_exists = True
 
-    decrypt_file(diary,key_seed)
+    if previous_exists:
+
+        with open(meta_dir + '/ ' + meta_diaries, 'rb') as f:
+
+            previous_diaries  = pickle.load(f)
+
+        for diary in glob.glob(diary_path+'/*.txt'):
+            diaries.append(diary)
+            if diary in previous_diaries:
+                decrypt_file(diary,key_seed)
+
+    else:
+        for diary in glob.glob(diary_path+'/*.txt'):
+
+            diaries.append(diary)
+
+
+
+
+
+    to_quit = input('press any key to quit\n')
+
+    with open(meta_dir + '/ ' + meta_diaries, 'wb') as f:
+        
+        pickle.dump(diaries, f)
+
+    for diary in diaries:
+
+        encrypt_file(diary,key_seed)
 
 
