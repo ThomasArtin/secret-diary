@@ -53,7 +53,7 @@ def decrypt_file(file,seed):
 previous_exists = False
 
 diary_path = 'Diaries'
-diary_path = os.path.join(os.path.dirname(__file__), diary_path)
+#diary_path = os.path.join(os.path.dirname(__file__), diary_path)
 
 if not os.path.exists(diary_path):
     os.makedirs(diary_path)
@@ -63,7 +63,7 @@ existing_diaries = glob.glob(diary_path+'/*.txt')
 if(len(existing_diaries) != 0):
 
     meta_dir = 'meta'
-    meta_dir = os.path.join(os.path.dirname(__file__), meta_dir)
+    #meta_dir = os.path.join(os.path.dirname(__file__), meta_dir)
     meta_diaries = 'previous.pkl'
 
     previous_diaries = []
@@ -71,6 +71,7 @@ if(len(existing_diaries) != 0):
 
     key_seed = input('enter password :\n')
 
+    correct_password = True
 
     if not os.path.exists(meta_dir):
         os.makedirs(meta_dir)
@@ -86,8 +87,29 @@ if(len(existing_diaries) != 0):
         for diary in glob.glob(diary_path+'/*.txt'):
             diaries.append(diary)
             if diary in previous_diaries:
-                decrypt_file(diary,key_seed)
-
+                try :
+                    correct_password = True
+                    decrypt_file(diary,key_seed)
+                except :
+                    correct_password = False
+                    break
+        
+        if(correct_password):
+            print('correct password\n')
+        else :
+            print('incorrect password\n')
+            key_seed = input('enter password :\n')
+            while(not(correct_password)):
+                for diary in glob.glob(diary_path+'/*.txt'):
+                    diaries.append(diary)
+                    if diary in previous_diaries:
+                        try :
+                            correct_password = True
+                            decrypt_file(diary,key_seed)
+                        except :
+                            correct_password = False
+                            break
+            print('correct password\n')
     else:
         for diary in glob.glob(diary_path+'/*.txt'):
 
